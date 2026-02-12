@@ -10,7 +10,7 @@ import "leaflet/dist/leaflet.css";
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <AuthProvider>
-      <BrowserRouter>
+      <BrowserRouter basename="/delivery">
         <App />
       </BrowserRouter>
     </AuthProvider>

@@ -4,6 +4,9 @@ import {
   LayoutDashboard, Building2, MapPin, Smartphone, 
   BarChart3, Users, Settings, Bell, CheckCircle, ChevronDown 
 } from "lucide-react";
+import landingPage1 from "../../../images/landingpage1.jpg";
+import image2 from "../../../images/image2.png";
+import landingPage2 from "../../../images/landingpage2.jpg";
 
 export default function LandingPage() {
   const { user, token, loading, logout } = useAuth();
@@ -63,7 +66,7 @@ export default function LandingPage() {
         {/* خلفية الصورة مع التعديلات لتطابق صورتك */}
         <div className="absolute inset-0 z-0 bg-[#1a1a1a]"> {/* خلفية غامقة أساسية */}
           <img
-            src="./images/landingpage1.jpg"
+            src={landingPage1}
             className="w-full h-full object-cover object-top opacity-60" 
             /* object-top: بتنزل الصورة لتحت ليبين راسها */
             /* opacity-60: بتعطي نفس تأثير التعتيم اللي بالصورة */
@@ -149,7 +152,7 @@ export default function LandingPage() {
               </p>
             </div>
             <div className="md:w-2/3 flex justify-center">
-              <img src="./images/image2.png" alt="Tracking Map" className="w-full max-w-[500px] object-contain drop-shadow-md" />
+              <img src={image2} alt="Tracking Map" className="w-full max-w-[500px] object-contain drop-shadow-md" />
             </div>
           </div>
         </div>
@@ -286,7 +289,7 @@ export default function LandingPage() {
         {/* خلفية الصورة مع التعديلات لتطابق صورتك */}
         <div className="absolute inset-0 z-0 bg-[#1a1a1a]"> {/* خلفية غامقة أساسية */}
           <img
-            src="./images/landingpage2.jpg"
+            src={landingPage2}
             className="w-full h-full object-cover object-top opacity-60" 
             /* object-top: بتنزل الصورة لتحت ليبين راسها */
             /* opacity-60: بتعطي نفس تأثير التعتيم اللي بالصورة */
