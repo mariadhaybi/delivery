@@ -1,0 +1,9 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* font placeholder – بتغيّره لاحقًا */
+body {
+  font-family: system-ui, sans-serif;
+}
