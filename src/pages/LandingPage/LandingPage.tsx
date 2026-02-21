@@ -1,8 +1,9 @@
 import { useAuth } from "../../context/authContext";
 import { useNavigate } from "react-router-dom";
-import { 
-  LayoutDashboard, Building2, MapPin, Smartphone, 
-  BarChart3, Users, Settings, Bell, CheckCircle, ChevronDown 
+import { useEffect } from "react";
+import {
+  LayoutDashboard, Building2, MapPin, Smartphone,
+  BarChart3, Users, Settings, Bell, CheckCircle, ChevronDown
 } from "lucide-react";
 import landingPage1 from "../../../images/landingpage1.jpg";
 import image2 from "../../../images/image2.png";
@@ -12,11 +13,25 @@ export default function LandingPage() {
   const { user, token, loading, logout } = useAuth();
   const navigate = useNavigate();
 
+  // Redirect admin users away from the landing page immediately
+  useEffect(() => {
+    if (!loading && user?.role === "admin") {
+      navigate("/admin", { replace: true });
+    }
+  }, [user, loading, navigate]);
+
   const handlePrimaryAction = () => {
-    if (!token || user?.role === "company") {
+    const role = user?.role?.toLowerCase();
+    if (!token) {
+      navigate("/login");
+    } else if (role === "admin") {
+      navigate("/admin");
+    } else if (role === "company") {
       navigate("/company/dashboard");
-    } else {
-      window.open("https://play.google.com/store", "_blank"); 
+    } else if (role === "driver") {
+      // Drivers stay on landing page and use the download app button
+      // But we can redirect if they have a specific dashboard
+      navigate("/");
     }
   };
 
@@ -31,11 +46,11 @@ export default function LandingPage() {
     <div className="font-[Poppins] bg-white text-[#232323] scroll-smooth">
       {/* --- Navbar --- */}
       <nav className="flex justify-between items-center p-6 bg-white shadow-sm sticky top-0 z-50">
-        <div className="text-[#E05C00] font-[Poppins]  font-semibold text-xl cursor-pointer" onClick={() => navigate("/")}>
+        <div className="text-[#E05C00] font-[Poppins] font-semibold text-xl cursor-pointer" onClick={() => navigate("/")}>
           Loop Delivery
         </div>
 
-        <div className=" font-[Poppins] hidden md:flex gap-6 text-sm font-medium">
+        <div className="font-[Poppins] hidden md:flex gap-6 text-sm font-medium">
           <a href="#features" className="hover:text-[#E05C00] transition-colors">Features</a>
           <a href="#how-it-works" className="hover:text-[#E05C00] transition-colors">How It Works</a>
           <a href="#platform" className="hover:text-[#E05C00] transition-colors">Platform</a>
@@ -46,7 +61,7 @@ export default function LandingPage() {
           {!token ? (
             <button
               onClick={() => navigate("/login")}
-              className=" font-[Poppins] px-6 py-2 bg-[#e45d05] text-white rounded-lg font-bold shadow-md hover:bg-[#c44e04] transition-all"
+              className="font-[Poppins] px-6 py-2 bg-[#e45d05] text-white rounded-lg font-bold shadow-md hover:bg-[#c44e04] transition-all"
             >
               Get Started
             </button>
@@ -63,24 +78,20 @@ export default function LandingPage() {
 
       {/* --- Hero Section --- */}
       <header className="relative h-[600px] flex items-center justify-center text-center text-white p-4">
-        {/* خلفية الصورة مع التعديلات لتطابق صورتك */}
-        <div className="absolute inset-0 z-0 bg-[#1a1a1a]"> {/* خلفية غامقة أساسية */}
+        <div className="absolute inset-0 z-0 bg-[#1a1a1a]">
           <img
             src={landingPage1}
-            className="w-full h-full object-cover object-top opacity-60" 
-            /* object-top: بتنزل الصورة لتحت ليبين راسها */
-            /* opacity-60: بتعطي نفس تأثير التعتيم اللي بالصورة */
+            className="w-full h-full object-cover object-top opacity-60"
             alt="Delivery"
           />
-          {/* طبقة إضافية للتعتيم المتدرج كرمال النص يوضح أكتر */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
         </div>
 
         <div className="relative z-10 max-w-4xl px-4">
-          <h1 className=" font-[Poppins] text-3xl md:text-5xl font-semibold mb-4 text-[#E05C00]">
+          <h1 className="font-[Poppins] text-3xl md:text-5xl font-semibold mb-4 text-[#E05C00]">
             Delivery Management System
           </h1>
-          <p className=" font-[Poppins] text-lg mb-8 opacity-90 leading-relaxed font-light text-[#FCFCFC]">
+          <p className="font-[Poppins] text-lg mb-8 opacity-90 leading-relaxed font-light text-[#FCFCFC]">
             A centralized platform to manage deliveries, drivers, and multiple
             <br className="hidden md:block" />
             branches. Streamline operations with real-time tracking and
@@ -100,7 +111,7 @@ export default function LandingPage() {
 
             {(!token || user?.role === "driver") && (
               <button
-                onClick={() => !token ? navigate("/login") : window.open("https://play.google.com/store", "_blank")}
+                onClick={() => !token ? navigate("/login") : window.open("https://play.google.com/store/games?device=windows", "_blank")}
                 className="bg-black/20 backdrop-blur-md border border-white/30 px-8 py-4 rounded-lg font-bold hover:bg-black/40 transition-all"
               >
                 {token ? "📲 Download Driver App" : "Join as a Driver"}
@@ -163,10 +174,10 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-6 text-center">
           <h2 className="font-[Poppins] text-3xl font-medium mb-4">How It Works?</h2>
           <p className="text-[#5F5F5F] font-medium text-xl mb-16 max-w-2xl mx-auto font-[Poppins]">A streamlined three-step process from order creation to delivery completion</p>
-          <div className=" font-[Poppins] grid md:grid-cols-3 gap-8 relative">
-            <StepCard number="01" icon={<Settings size={26}/>} title="Admin Creates Operations" desc="Operations managers use the admin dashboard to create delivery orders and manage branches." />
-            <StepCard number="02" icon={<Bell size={26}/>} title="Drivers Receive Requests" desc="Drivers receive instant notifications on their mobile app with order and location details." />
-            <StepCard number="03" icon={<CheckCircle size={26}/>} title="Real-Time Tracking" desc="Deliveries are tracked in real-time as drivers update status and admins monitor progress." />
+          <div className="font-[Poppins] grid md:grid-cols-3 gap-8 relative">
+            <StepCard number="01" icon={<Settings size={26} />} title="Admin Creates Operations" desc="Operations managers use the admin dashboard to create delivery orders and manage branches." />
+            <StepCard number="02" icon={<Bell size={26} />} title="Drivers Receive Requests" desc="Drivers receive instant notifications on their mobile app with order and location details." />
+            <StepCard number="03" icon={<CheckCircle size={26} />} title="Real-Time Tracking" desc="Deliveries are tracked in real-time as drivers update status and admins monitor progress." />
           </div>
         </div>
       </section>
@@ -183,32 +194,32 @@ export default function LandingPage() {
             <div className="flex items-center gap-4 mb-8">
               <div className="w-12 h-12 bg-[#e45d05] rounded-xl flex items-center justify-center text-white shadow-md"><LayoutDashboard size={24} /></div>
               <div>
-                <h3 className="font-[Poppins] font-medium  text-xl">Admin Dashboard</h3>
-                <p className="text-sm font-[Poppins]  text-[#7C7C7C]">Web-based management console</p>
+                <h3 className="font-[Poppins] font-medium text-xl">Admin Dashboard</h3>
+                <p className="text-sm font-[Poppins] text-[#7C7C7C]">Web-based management console</p>
               </div>
             </div>
             <div className="bg-[#F8F9FA] border border-gray-100 rounded-[2.5rem] p-8 shadow-sm">
-               <div className="flex items-center gap-2 mb-8 text-[#5F5F5F] text-xs font-bold uppercase tracking-widest">
-                  <div className="w-4 h-4 rounded-full border-2 border-[#e45d05] flex items-center justify-center"><div className="w-1 h-1 bg-[#e45d05] rounded-full"></div></div>
-                  Dashboard Overview
-               </div>
-               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <StatCard value="247" label="Active Deliveries" />
-                  <StatCard value="42" label="Online Drivers" />
-                  <StatCard value="1" label="Restaurant" />
-               </div>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-                  <div className="bg-white rounded-2xl p-6 shadow-sm min-h-[140px] border border-gray-50 flex flex-col justify-between">
-                    <span className="font-[Poppins] text-xs text-[#5F5F5F] font-bold uppercase tracking-tighter">📊 Analytics</span>
-                    <div className="h-2 bg-gray-100 rounded-full w-full relative overflow-hidden">
-                       <div className="absolute top-0 left-0 h-full bg-[#e45d05]/20 w-3/4"></div>
-                    </div>
+              <div className="flex items-center gap-2 mb-8 text-[#5F5F5F] text-xs font-bold uppercase tracking-widest">
+                <div className="w-4 h-4 rounded-full border-2 border-[#e45d05] flex items-center justify-center"><div className="w-1 h-1 bg-[#e45d05] rounded-full"></div></div>
+                Dashboard Overview
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <StatCard value="247" label="Active Deliveries" />
+                <StatCard value="42" label="Online Drivers" />
+                <StatCard value="1" label="Restaurant" />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div className="bg-white rounded-2xl p-6 shadow-sm min-h-[140px] border border-gray-50 flex flex-col justify-between">
+                  <span className="font-[Poppins] text-xs text-[#5F5F5F] font-bold uppercase tracking-tighter">📊 Analytics</span>
+                  <div className="h-2 bg-gray-100 rounded-full w-full relative overflow-hidden">
+                    <div className="absolute top-0 left-0 h-full bg-[#e45d05]/20 w-3/4"></div>
                   </div>
-                  <div className="bg-white rounded-2xl p-6 shadow-sm min-h-[140px] border border-gray-50 flex flex-col justify-between">
-                    <span className="font-[Poppins] text-xs text-[#5F5F5F] font-bold uppercase tracking-tighter">📍 Live Map</span>
-                    <div className="h-2 bg-gray-100 rounded-full w-2/3"></div>
-                  </div>
-               </div>
+                </div>
+                <div className="bg-white rounded-2xl p-6 shadow-sm min-h-[140px] border border-gray-50 flex flex-col justify-between">
+                  <span className="font-[Poppins] text-xs text-[#5F5F5F] font-bold uppercase tracking-tighter">📍 Live Map</span>
+                  <div className="h-2 bg-gray-100 rounded-full w-2/3"></div>
+                </div>
+              </div>
             </div>
             <ul className="mt-8 space-y-2 text-[#5F5F5F] text-lg font-[Poppins]">
               <li>• Real-time delivery tracking map</li>
@@ -222,8 +233,8 @@ export default function LandingPage() {
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-12 h-12 bg-[#e45d05] rounded-xl flex items-center justify-center text-white shadow-md"><Smartphone size={24} /></div>
                 <div>
-                  <h3 className="font-[Poppins] font-medium  text-xl">Driver Mobile App</h3>
-                  <p className="text-sm font-[Poppins]  text-[#7C7C7C]">iOS and Android application</p>
+                  <h3 className="font-[Poppins] font-medium text-xl">Driver Mobile App</h3>
+                  <p className="text-sm font-[Poppins] text-[#7C7C7C]">iOS and Android application</p>
                 </div>
               </div>
               <ul className="space-y-4 text-[#5F5F5F] text-lg font-[Poppins]">
@@ -236,14 +247,14 @@ export default function LandingPage() {
               <div className="w-[280px] h-[520px] bg-[#7C7C7C] rounded-[3rem] border-[10px] border-[#7C7C7C] shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-6 bg-[#7C7C7C] rounded-b-2xl z-20"></div>
                 <div className="bg-white w-full h-full p-6 pt-12 flex flex-col">
-                   <div className="w-full h-36 bg-gray-100 rounded-2xl mb-8 border border-gray-200"></div>
-                   <div className="space-y-3">
-                      <div className="h-3 bg-gray-100 rounded w-3/4"></div>
-                      <div className="h-3 bg-gray-100 rounded w-1/2"></div>
-                   </div>
-                   <div className="w-full h-12 bg-[#e45d05] rounded-xl mt-auto mb-4 flex items-center justify-center shadow-lg shadow-orange-100">
-                      <div className="w-10 h-1 bg-white/40 rounded-full"></div>
-                   </div>
+                  <div className="w-full h-36 bg-gray-100 rounded-2xl mb-8 border border-gray-200"></div>
+                  <div className="space-y-3">
+                    <div className="h-3 bg-gray-100 rounded w-3/4"></div>
+                    <div className="h-3 bg-gray-100 rounded w-1/2"></div>
+                  </div>
+                  <div className="w-full h-12 bg-[#e45d05] rounded-xl mt-auto mb-4 flex items-center justify-center shadow-lg shadow-orange-100">
+                    <div className="w-10 h-1 bg-white/40 rounded-full"></div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -254,30 +265,30 @@ export default function LandingPage() {
       {/* --- Section: FAQ --- */}
       <section id="faqs" className="py-24 bg-white border-t border-gray-50">
         <div className="max-w-4xl mx-auto px-6">
-          <h2 className=" font-[Poppins] text-3xl font-medium text-center mb-16">Frequently Asked Questions</h2>
+          <h2 className="font-[Poppins] text-3xl font-medium text-center mb-16">Frequently Asked Questions</h2>
           <div className="space-y-2 font-[Poppins]">
-            <FAQItem 
-              question="What Is This Delivery System?" 
+            <FAQItem
+              question="What Is This Delivery System?"
               answer="Loop Delivery is a centralized management platform designed for restaurant chains and businesses to coordinate their logistics, monitor driver performance, and track orders in real-time."
             />
-            <FAQItem 
-              question="Who The System Designed For?" 
+            <FAQItem
+              question="Who The System Designed For?"
               answer="The system is tailor-made for business owners (Companies) who need to manage multiple branches and a fleet of drivers, as well as for individual delivery drivers looking for an efficient app to manage their requests."
             />
-            <FAQItem 
-              question="Can Orders Be Tracked In Real-Time?" 
+            <FAQItem
+              question="Can Orders Be Tracked In Real-Time?"
               answer="Yes! Our platform provides live GPS tracking, allowing administrators to see exactly where drivers are on a map and monitor the progress of every delivery from start to finish."
             />
-            <FAQItem 
-              question="Can Drivers Accept Or Reject Delivery Requests?" 
+            <FAQItem
+              question="Can Drivers Accept Or Reject Delivery Requests?"
               answer="Absolutely. Drivers receive instant push notifications for new requests and have the flexibility to accept or decline based on their current status and proximity."
             />
-            <FAQItem 
-              question="Is The System Secure?" 
+            <FAQItem
+              question="Is The System Secure?"
               answer="Security is our priority. We use industry-standard encryption and secure authentication methods to ensure that all business, driver, and customer data remains protected."
             />
-            <FAQItem 
-              question="Can The System Be Customized?" 
+            <FAQItem
+              question="Can The System Be Customized?"
               answer="Yes, the platform offers various settings for branches and fleet management to ensure it fits the specific workflow of your delivery operations."
             />
           </div>
@@ -286,30 +297,33 @@ export default function LandingPage() {
 
       {/* --- Section: Final CTA (Banner) --- */}
       <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
-        {/* خلفية الصورة مع التعديلات لتطابق صورتك */}
-        <div className="absolute inset-0 z-0 bg-[#1a1a1a]"> {/* خلفية غامقة أساسية */}
+        <div className="absolute inset-0 z-0 bg-[#1a1a1a]">
           <img
             src={landingPage2}
-            className="w-full h-full object-cover object-top opacity-60" 
-            /* object-top: بتنزل الصورة لتحت ليبين راسها */
-            /* opacity-60: بتعطي نفس تأثير التعتيم اللي بالصورة */
+            className="w-full h-full object-cover object-top opacity-60"
             alt="Delivery"
           />
-          {/* طبقة إضافية للتعتيم المتدرج كرمال النص يوضح أكتر */}
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black/70"></div>
         </div>
         <div className="relative z-10 text-center px-6 max-w-3xl">
-          <h2 className=" font-[Poppins] text-3xl md:text-5xl font-bold text-[#E05C00] mb-6 leading-tight">
-            Ready To Streamline Your <br/> <span className="text-[#E05C00] font-[Poppins]">Deliveries?</span>
+          <h2 className="font-[Poppins] text-3xl md:text-5xl font-bold text-[#E05C00] mb-6 leading-tight">
+            Ready To Streamline Your <br /> <span className="text-[#E05C00] font-[Poppins]">Deliveries?</span>
           </h2>
           <p className="text-gray-200 mb-10 text-lg opacity-90 font-[Poppins]">Download the driver app to manage orders, routes, and deliveries with ease</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-             <button onClick={handlePrimaryAction} className="bg-[#E05C00] text-white px-8 py-4 rounded-xl font-bold shadow-xl hover:bg-[#c44e04] transition-all flex items-center justify-center gap-2">
-               + New Delivery Request
-             </button>
-             <button className="bg-transparent border-2 border-orange-600 backdrop-blur-md text-white px-8 py-4 rounded-xl font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2">
-               📲 Download Driver App
-             </button>
+            {(!token || user?.role === "company") && (
+              <button onClick={handlePrimaryAction} className="bg-[#E05C00] text-white px-8 py-4 rounded-xl font-bold shadow-xl hover:bg-[#c44e04] transition-all flex items-center justify-center gap-2">
+                + New Delivery Request
+              </button>
+            )}
+            {(!token || user?.role === "driver") && (
+              <button
+                onClick={() => !token ? navigate("/login") : window.open("https://play.google.com/store/games?device=windows", "_blank")}
+                className="bg-transparent border-2 border-orange-600 backdrop-blur-md text-white px-8 py-4 rounded-xl font-bold hover:bg-white/10 transition-all flex items-center justify-center gap-2"
+              >
+                {token ? "📲 Download Driver App" : "Join as a Driver"}
+              </button>
+            )}
           </div>
         </div>
       </section>
@@ -323,7 +337,7 @@ export default function LandingPage() {
               Delivery Management System for streamline operations with centralized control and real-time tracking.
             </p>
           </div>
-          
+
           <div>
             <h4 className="font-bold text-[#232323] mb-6">Platform</h4>
             <ul className="space-y-4 text-sm font-medium">
@@ -345,9 +359,9 @@ export default function LandingPage() {
 
           <div className="flex flex-col md:items-end gap-6">
             <div className="flex gap-4">
-               <div className="w-10 h-10 bg-[#e45d05] rounded-full flex items-center justify-center text-white cursor-pointer shadow-md">f</div>
-               <div className="w-10 h-10 bg-[#e45d05] rounded-full flex items-center justify-center text-white cursor-pointer shadow-md">i</div>
-               <div className="w-10 h-10 bg-[#e45d05] rounded-full flex items-center justify-center text-white cursor-pointer shadow-md">t</div>
+              <div className="w-10 h-10 bg-[#e45d05] rounded-full flex items-center justify-center text-white cursor-pointer shadow-md">f</div>
+              <div className="w-10 h-10 bg-[#e45d05] rounded-full flex items-center justify-center text-white cursor-pointer shadow-md">i</div>
+              <div className="w-10 h-10 bg-[#e45d05] rounded-full flex items-center justify-center text-white cursor-pointer shadow-md">t</div>
             </div>
           </div>
         </div>
@@ -365,7 +379,7 @@ export default function LandingPage() {
   );
 }
 
-// --- المكونات الفرعية لضمان النظافة (Sub-components) ---
+// --- Sub-components ---
 
 function FAQItem({ question, answer }: { question: string, answer: string }) {
   return (

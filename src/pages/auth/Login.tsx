@@ -1,27 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "../../context/authContext";
 import { Mail, Lock, Eye, EyeOff, UserRound, LogIn } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export default function Login() {
-  const { login, user } = useAuth();
+  const { login, user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
+  // Redirect if already logged in
+  useEffect(() => {
+    if (!authLoading && user) {
+      const role = user.role?.toLowerCase();
+      if (role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
+    }
+  }, [user, authLoading, navigate]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(email, password);
+      const { user: loggedInUser } = await login(email, password);
+      const role = loggedInUser.role?.toLowerCase();
 
-      // Redirect based on role
-      if (user?.role === "company") navigate("/company/dashboard");
-      else if (user?.role === "driver") navigate("/driver/dashboard");
-      else if (user?.role === "admin") navigate("/admin");
-      else navigate("/"); // fallback
+      if (role === "admin") {
+        navigate("/admin", { replace: true });
+      } else {
+        navigate("/", { replace: true });
+      }
+
     } catch (error: any) {
       console.error("Login failed:", error);
       alert(error.response?.data?.message || "Invalid Email or Password");
@@ -48,7 +62,6 @@ export default function Login() {
         </p>
 
         <form onSubmit={handleSubmit}>
-          {/* Email */}
           <label className="font-[Poppins] text-[#232323] text-sm leading-[30px] font-medium">Email</label>
           <div className="mt-1 mb-4 flex items-center border border-gray-300 rounded-lg px-3 h-11">
             <Mail size={16} className="text-gray-400" />
@@ -56,13 +69,12 @@ export default function Login() {
               type="email"
               placeholder="example@loopdelivery.com"
               className="ml-2 w-full outline-none text-sm"
-              value={email}                  // ← ربطنا القيمة بالـ state
+              value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
             />
           </div>
 
-          {/* Password */}
           <label className="font-[Poppins] text-[#232323] text-sm leading-[30px] font-medium">Password</label>
           <div className="mt-1 mb-6 flex items-center border border-gray-300 rounded-lg px-3 h-11">
             <Lock size={16} className="text-gray-400" />
@@ -70,14 +82,11 @@ export default function Login() {
               type={showPassword ? "text" : "password"}
               placeholder="password"
               className="ml-2 w-full outline-none text-sm"
-              value={password}               // ← ربطنا القيمة بالـ state
+              value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
             />
-            <span
-              className="text-gray-400 cursor-pointer"
-              onClick={() => setShowPassword(!showPassword)}
-            >
+            <span className="text-gray-400 cursor-pointer" onClick={() => setShowPassword(!showPassword)}>
               {showPassword ? <Eye size={16} /> : <EyeOff size={16} />}
             </span>
           </div>
@@ -87,9 +96,7 @@ export default function Login() {
             disabled={loading}
             className="w-full bg-[#D95F08] hover:bg-[#b54f06] text-white h-11 rounded-lg font-bold text-[15px] flex items-center justify-center gap-2 shadow-lg shadow-orange-100 transition-all "
           >
-            {loading ? (
-              "Logging in..."
-            ) : (
+            {loading ? "Logging in..." : (
               <div className="flex items-center justify-center gap-2">
                 <span>Login</span>
                 <LogIn size={18} className="stroke-[2.5px]" />
@@ -101,10 +108,7 @@ export default function Login() {
         <div className="text-center mt-4 text-sm">
           <p className="text-gray-500">
             Don’t Have An Account?
-            <span
-              className="text-orange-500 cursor-pointer ml-1"
-              onClick={() => navigate("/register")}
-            >
+            <span className="text-orange-500 cursor-pointer ml-1" onClick={() => navigate("/register")}>
               Sign Up
             </span>
           </p>
